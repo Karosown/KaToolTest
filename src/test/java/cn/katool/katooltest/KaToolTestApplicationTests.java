@@ -1,38 +1,74 @@
 package cn.katool.katooltest;
 
-import cn.hutool.core.date.DateUtil;
-import cn.katool.lock.LockMessageWatchDog;
+import cn.katool.katooltest.entity.User;
+import cn.katool.util.auth.AuthUtil;
 import cn.katool.util.cache.utils.CaffeineUtils;
-import cn.katool.util.db.nosql.RedisUtils;
-import com.github.benmanes.caffeine.cache.Cache;
+import cn.katool.util.database.nosql.RedisUtils;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.units.qual.N;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.BeanUtils;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.types.RedisClientInfo;
 
 import javax.annotation.Resource;
+import java.lang.reflect.InvocationTargetException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
+
+import java.util.List;
+import java.util.Map;
+
 
 @SpringBootTest
 @Slf4j
 class KaToolTestApplicationTests {
 
     @Resource
-    RedisUtils redisUtils;
+    RedisUtils<String,String> redisUtils;
 
     @Resource
     CaffeineUtils caffeineUtils;
+
+    @Resource
+    RedisTemplate redisTemplate;
+
+    @Test
+    void test(){
+        System.out.println(redisUtils);
+        RedisUtils instance = RedisUtils.getInstance(redisTemplate);
+        System.out.println(instance);
+    }
 
     // 分布式锁单元测试
     @Test
     void Test(){
         redisUtils.lock("1");
         redisUtils.unlock("1");
+    }
+
+    @Test
+    void testRange(){
+        redisUtils.putZSet("qwe","2",3D);
+        redisUtils.getZSetByRange("qwe",0L,-1L);
+    }
+    @Test
+    void testMap(){
+       redisUtils.getMap("123");
+
+        Map map = redisUtils.getMap("123");
+
+        (map).forEach((k,v)-> {
+            System.out.println(v);
+        });
+        System.out.println(map);
     }
     @Test
     void DistributedLockTest() throws InterruptedException, ParseException {
@@ -105,6 +141,14 @@ class KaToolTestApplicationTests {
             Thread.sleep(2000);
         }
 //        return ;
+    }
+
+
+
+    @Test
+    void AuthTest() throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+        String token = AuthUtil.createToken(new User("123", "456"), User.class);
+        System.out.println(AuthUtil.getUserFromToken(token, User.class));
     }
 
 }

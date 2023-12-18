@@ -29,7 +29,7 @@
         <dependency>
             <groupId>cn.katool</groupId>
             <artifactId>katool</artifactId>
-            <version>1.9.0</version>
+            <version>1.9.5.GAMA</version>
         </dependency>
         <dependency>
             <groupId>com.mysql</groupId>

@@ -1,14 +1,19 @@
 server:
     port: 8081
 katool:
-    lock:
-        internalLockLeaseTime: 30   # 分布式锁默认租约时间
-        timeUnit: seconds           # 租约时间单位
-    util:
-        redis:
-            policy: "caffeine"      # 选择内存缓存策略，caffeine
-            exptime: {5*60*1000}           # LFU过期时间
-            time-unit: milliseconds #  过期时间单位
+    auth:
+        salt-key: "katooltest"   # JWT加密盐值
+        exp-time: { 7*24*60*60*1000 }   # JWT过期时间
+        token-header: "Authorization"   # 请求头中存放token的Header
+    cache:
+        policy: "caffeine"      # 选择内存缓存策略，caffeine
+        exp-time: { 5*60*1000 }           # LFU过期时间
+        time-unit: milliseconds #  过期时间单位
+    redis:
+        policy: "default"       # 多级缓存策略模式选定，默认情况下和cache采用同一个策略，我cache是啥，那么policy就是啥
+        lock:
+            internalLockLeaseTime: 30   # 分布式锁默认租约时间
+            timeUnit: seconds           # 租约时间单位
 
 spring:
     redis:
@@ -21,4 +26,11 @@ spring:
                 max-active: 100 # 连接池最大连接数（使用负值表示没有限制）
                 max-idle: 100 # 连接池中的最大空闲连接
                 min-idle: 3 # 连接池中的最小空闲连接
-                max-wait: 5000ms # 连接池最大阻塞等待时间（使用负值表示没有限制）
+                max-wait: -50000ms # 连接池最大阻塞等待时间（使用负值表示没有限制）
+    task:
+        execution:
+            pool:
+                core-size: 1000
+                max-size: 5000
+                queue-capacity: 3000
+                keep-alive: 300s
